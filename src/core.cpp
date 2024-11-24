@@ -16,6 +16,15 @@
 
 namespace pipewire
 {
+    struct state 
+    {
+        raw_type* core;
+        int pending;
+        std::optional<std::variant<bool, error>> result;
+
+        explicit state(raw_type* core) : core(core), pending(0) {}
+    };
+
     struct core::impl
     {
         pw_unique_ptr<raw_type> core;
@@ -49,11 +58,11 @@ namespace pipewire
     template <>
     cancellable_lazy<expected<bool>> core::update<update_strategy::sync>()
     {
-        auto loop = context()->main_loop();
+        auto loop = m_impl->context->loop();
         auto m_state = std::make_shared<state>(m_impl->core.get());
         auto weak_state = std::weak_ptr{m_state};
 
-        auto sync_callback = [weak_state](void *data, uint32_t id, int seq) {
+        auto sync_callback = [weak_state = weak_state](void *data, uint32_t id, int seq) {
             if (auto state = weak_state.lock())
             {
                 if (--state->pending == 0)
@@ -63,7 +72,7 @@ namespace pipewire
             }
         };
 
-        auto error_callback = [weak_state](void *data, uint32_t id, int seq, int res, const char *message) {
+        auto error_callback = [weak_state = weak_state](void *data, uint32_t id, int seq, int res, const char *message) {
             if (auto state = weak_state.lock())
             {
                 state->pending = 0;
@@ -71,7 +80,7 @@ namespace pipewire
             }
         };
 
-        return make_cancellable_lazy<expected<bool>>([loop, m_state](auto token) -> expected<bool> {
+        return make_cancellable_lazy<expected<bool>>([loop = loop, m_state = m_state](auto token) -> expected<bool> {
             while (!token.stop_requested() && !m_state->result.has_value())
             {
                 loop->run();
