@@ -1,6 +1,5 @@
 #include "utils/check.hpp"
-
-#include <format>
+#include <fmt/core.h>
 #include <cstring>
 #include <iostream>
 
@@ -16,11 +15,11 @@ namespace pipewire
             return;
         }
 
-        const auto *error       = strerror(errno); // NOLINT(*-mt-unsafe)
-        auto [file, line, func] = std::make_tuple(loc.file_name(), loc.line(), loc.function_name());
-
-        std::cerr << std::format(R"([{}] ({}:{}): check failed "{}", error is "{}")", func, file, line, message, error)
-                  << std::endl;
+        const auto *error = strerror(errno);
+        std::cerr << fmt::format("{}:{} in function '{}': {} ({})\n",
+            loc.file_name(), loc.line(), loc.function_name(),
+            message, error);
+        std::abort();
     }
 #endif
 } // namespace pipewire
