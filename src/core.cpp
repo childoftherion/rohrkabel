@@ -2,15 +2,12 @@
 #include "core/events.hpp"
 
 #include "utils/check.hpp"
-#include "error.hpp"
 
 #include "link/link.hpp"
 #include "node/node.hpp"
 #include "proxy/proxy.hpp"
 
 #include <fmt/core.h>
-#include <optional>
-#include <variant>
 
 #include <pipewire/pipewire.h>
 
@@ -20,21 +17,6 @@ namespace pipewire
     {
         pw_unique_ptr<raw_type> core;
         std::shared_ptr<pipewire::context> context;
-    };
-
-    class core
-    {
-    public:
-        struct state 
-        {
-            core::raw_type* core;
-            int pending;
-            std::optional<std::variant<bool, error>> result;
-
-            explicit state(core::raw_type* core) : core(core), pending(0) {}
-        };
-
-        // ... rest of the class definition
     };
 
     core::~core() = default;

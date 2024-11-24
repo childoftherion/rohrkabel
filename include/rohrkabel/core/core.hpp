@@ -4,6 +4,7 @@
 #include "../properties.hpp"
 #include "../utils/traits.hpp"
 #include "../utils/deleter.hpp"
+#include "../error.hpp"
 
 #include <memory>
 #include <optional>
@@ -34,13 +35,22 @@ namespace pipewire
     class core
     {
         struct impl;
-        struct state;
 
       public:
         using raw_type = pw_core;
 
       private:
+        struct state 
+        {
+            raw_type* core;
+            int pending;
+            std::optional<std::variant<bool, error>> result;
+
+            explicit state(raw_type* core) : core(core), pending(0) {}
+        };
+
         std::unique_ptr<impl> m_impl;
+        state m_state;
 
       public:
         ~core();
