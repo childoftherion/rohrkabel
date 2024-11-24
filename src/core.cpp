@@ -16,19 +16,25 @@
 
 namespace pipewire
 {
-    struct state 
-    {
-        raw_type* core;
-        int pending;
-        std::optional<std::variant<bool, error>> result;
-
-        explicit state(raw_type* core) : core(core), pending(0) {}
-    };
-
     struct core::impl
     {
         pw_unique_ptr<raw_type> core;
         std::shared_ptr<pipewire::context> context;
+    };
+
+    class core
+    {
+    public:
+        struct state 
+        {
+            core::raw_type* core;
+            int pending;
+            std::optional<std::variant<bool, error>> result;
+
+            explicit state(core::raw_type* core) : core(core), pending(0) {}
+        };
+
+        // ... rest of the class definition
     };
 
     core::~core() = default;

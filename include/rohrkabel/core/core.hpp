@@ -7,6 +7,7 @@
 
 #include <memory>
 #include <optional>
+#include <variant>
 
 struct pw_core;
 
@@ -33,6 +34,7 @@ namespace pipewire
     class core
     {
         struct impl;
+        struct state;
 
       public:
         using raw_type = pw_core;
