@@ -44,11 +44,13 @@ endif()
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
   target_compile_options(${PROJECT_NAME} PUBLIC -Wno-attributes=rk::)
-else()
+  target_compile_options(${PROJECT_NAME} PRIVATE -Wno-missing-field-initializers -Wno-cast-function-type)
+elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   target_compile_options(${PROJECT_NAME} PUBLIC -Wno-unknown-attributes)
+  target_compile_options(${PROJECT_NAME} PRIVATE -Wno-unknown-warning-option -Wno-missing-field-initializers -Wno-cast-function-type)
 endif()
 
-target_compile_options(${PROJECT_NAME} PRIVATE -Wno-unknown-warning-option -Wno-missing-field-initializers -Wno-cast-function-type)
+target_compile_options(${PROJECT_NAME} PRIVATE -Wno-unknown-warning-option)
 
 # --------------------------------------------------------------------------------------------------------
 # Disable warnings for GNU-Extensions on Clang because PipeWire makes use of them

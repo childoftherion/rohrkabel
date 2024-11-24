@@ -23,6 +23,7 @@ namespace pipewire
 
     core::core(deleter<raw_type> deleter, raw_type *raw, std::shared_ptr<pipewire::context> context)
         : m_impl(std::make_unique<impl>(pw_unique_ptr<raw_type>{raw, deleter}, std::move(context)))
+        , m_state(raw)
     {
     }
 
