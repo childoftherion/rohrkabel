@@ -109,7 +109,14 @@ CPMFindPackage(
   GIT_REPOSITORY "https://github.com/Curve/channel"
 )
 
-target_link_libraries(${PROJECT_NAME} PUBLIC tl::expected cr::ereignis Boost::callable_traits cr::channel)
+CPMFindPackage(
+  NAME           fmt
+  VERSION        10.1.1
+  GIT_REPOSITORY "https://github.com/fmtlib/fmt"
+  OPTIONS        "FMT_INSTALL ON"
+)
+
+target_link_libraries(${PROJECT_NAME} PUBLIC tl::expected cr::ereignis Boost::callable_traits cr::channel fmt::fmt)
 
 # --------------------------------------------------------------------------------------------------------
 # Custom Find-Package configurations
