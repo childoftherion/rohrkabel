@@ -1,4 +1,4 @@
-#include <format>
+#include <fmt/core.h>
 #include <iostream>
 
 #include <rohrkabel/device/device.hpp>
@@ -50,7 +50,7 @@ int main()
         auto &device = devices.at(i);
         auto name    = device.info().props.at("device.description");
 
-        std::cout << std::format("{}. {}", i, name) << std::endl;
+        std::cout << fmt::format("{}. {}", i, name) << std::endl;
     }
 
     std::cout << std::endl;

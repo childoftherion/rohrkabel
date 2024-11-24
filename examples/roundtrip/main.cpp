@@ -1,4 +1,4 @@
-#include <format>
+#include <fmt/core.h>
 #include <iostream>
 
 #include <rohrkabel/node/node.hpp>
@@ -27,18 +27,18 @@ int main()
 
         if (!node.has_value())
         {
-            std::cout << std::format("failed to bind {}: {}", global.id, node.error().message) << std::endl;
+            std::cout << fmt::format("failed to bind {}: {}", global.id, node.error().message) << std::endl;
             return;
         }
 
         auto info = node->info();
 
-        std::cout << std::format("Node ({}): ", info.id) << std::endl;
+        std::cout << fmt::format("Node ({}): ", info.id) << std::endl;
         static auto indent = std::string{4, ' '};
 
         for (const auto &prop : info.props)
         {
-            std::cout << std::format("{} \"{}\": {}", indent, prop.first, prop.second) << std::endl;
+            std::cout << fmt::format("{} \"{}\": {}", indent, prop.first, prop.second) << std::endl;
         }
     };
 

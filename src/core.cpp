@@ -7,7 +7,7 @@
 #include "node/node.hpp"
 #include "proxy/proxy.hpp"
 
-#include <format>
+#include <fmt/core.h>
 #include <optional>
 
 #include <pipewire/pipewire.h>

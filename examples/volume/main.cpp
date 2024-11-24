@@ -1,5 +1,5 @@
 #include <cmath>
-#include <format>
+#include <fmt/core.h>
 #include <iostream>
 
 #include <rohrkabel/device/device.hpp>
@@ -51,7 +51,7 @@ int main()
         auto &device = devices.at(i);
         auto name    = device.info().props.at("device.description");
 
-        std::cout << std::format("{}. {}", i, name) << std::endl;
+        std::cout << fmt::format("{}. {}", i, name) << std::endl;
     }
 
     std::cout << std::endl;
@@ -86,7 +86,7 @@ int main()
                                  return std::powf(volume / 100, 3);
                              });
 
-        std::cout << std::format("Updating volume from {}% to {}%", std::cbrt(channels[0]) * 100, volume) << std::endl;
+        std::cout << fmt::format("Updating volume from {}% to {}%", std::cbrt(channels[0]) * 100, volume) << std::endl;
 
         prop->value().write<std::vector<float>>({cubic_volumes.begin(), cubic_volumes.end()});
         device.set_param(pod_id, 0, pod);
