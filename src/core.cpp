@@ -2,6 +2,7 @@
 #include "core/events.hpp"
 
 #include "utils/check.hpp"
+#include "error.hpp"
 
 #include "link/link.hpp"
 #include "node/node.hpp"
@@ -9,6 +10,7 @@
 
 #include <fmt/core.h>
 #include <optional>
+#include <variant>
 
 #include <pipewire/pipewire.h>
 
@@ -47,45 +49,27 @@ namespace pipewire
     template <>
     cancellable_lazy<expected<bool>> core::update<update_strategy::sync>()
     {
-        struct state
-        {
-            core_listener listener;
-
-          public:
-            int pending;
-
-          public:
-            std::optional<std::variant<bool, error>> result;
-        };
-
-        auto m_state    = std::make_shared<state>(m_impl->core.get());
+        auto loop = context()->main_loop();
+        auto m_state = std::make_shared<state>(m_impl->core.get());
         auto weak_state = std::weak_ptr{m_state};
 
-        auto loop = m_impl->context->loop();
-
-        m_state->listener.on<core_event::done>([loop, weak_state](auto id, auto seq) {
-            if (id != core_id || seq != weak_state.lock()->pending)
+        auto sync_callback = [weak_state](void *data, uint32_t id, int seq) {
+            if (auto state = weak_state.lock())
             {
-                return;
+                if (--state->pending == 0)
+                {
+                    state->result.emplace(std::variant<bool, error>{true});
+                }
             }
+        };
 
-            weak_state.lock()->result.emplace(true);
-            loop->quit();
-        });
-
-        m_state->listener.on<core_event::error>([loop, weak_state](auto id, const auto &error) {
-            if (id != core_id)
+        auto error_callback = [weak_state](void *data, uint32_t id, int seq, int res, const char *message) {
+            if (auto state = weak_state.lock())
             {
-                return;
+                state->pending = 0;
+                state->result.emplace(std::variant<bool, error>{error{seq, res, message}});
             }
-
-            check(false, error.message);
-
-            weak_state.lock()->result.emplace(error);
-            loop->quit();
-        });
-
-        m_state->pending = sync(0);
+        };
 
         return make_cancellable_lazy<expected<bool>>([loop, m_state](auto token) -> expected<bool> {
             while (!token.stop_requested() && !m_state->result.has_value())
@@ -93,7 +77,7 @@ namespace pipewire
                 loop->run();
             }
 
-            auto result = m_state->result.value_or(false);
+            auto result = m_state->result.value_or(std::variant<bool, error>{false});
 
             if (std::holds_alternative<error>(result))
             {
@@ -155,7 +139,7 @@ namespace pipewire
 
         for (const auto &position : factory.positions)
         {
-            positions += std::format("{},", position);
+            positions += fmt::format("{},", position);
         }
 
         positions.pop_back();
